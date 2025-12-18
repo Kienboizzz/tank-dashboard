@@ -4,65 +4,148 @@
 <head>
     <meta charset="UTF-8">
     <title>Tank MQTT Dashboard</title>
-
-    <!-- MQTT.js -->
     <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
 
     <style>
         body {
-            font-family: Arial, sans-serif;
-            background: #f4f6f8;
+            font-family: "Segoe UI", sans-serif;
+            background: linear-gradient(135deg, #e3f2fd, #f9fbe7);
             margin: 0;
             padding: 20px;
         }
         
-        h2 {
-            margin-top: 0;
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
         }
         
         .container {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
             gap: 20px;
         }
         
         .card {
             background: #fff;
-            border-radius: 10px;
-            padding: 15px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
         }
         
-        .value {
-            font-size: 28px;
-            font-weight: bold;
+        h2 {
+            margin-top: 0;
         }
+        /* ===== LEVEL BAR ===== */
         
-        .switch {
-            display: flex;
-            align-items: center;
-            gap: 10px;
+        .bar {
+            height: 22px;
+            background: #ddd;
+            border-radius: 12px;
+            overflow: hidden;
             margin: 8px 0;
         }
         
+        .bar-fill {
+            height: 100%;
+            width: 0%;
+            transition: width 0.5s, background 0.5s;
+        }
+        /* ===== TEMP COLORS ===== */
+        
+        .cold {
+            background: #42a5f5;
+        }
+        
+        .warm {
+            background: #66bb6a;
+        }
+        
+        .hot {
+            background: #ef5350;
+        }
+        /* ===== LIGHT GAUGE ===== */
+        
+        .gauge {
+            width: 140px;
+            height: 140px;
+            border-radius: 50%;
+            background: radial-gradient(#fff 40%, #ddd);
+            position: relative;
+            margin: auto;
+        }
+        
+        .needle {
+            width: 4px;
+            height: 60px;
+            background: #ff9800;
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform-origin: bottom center;
+            transform: rotate(-90deg);
+            transition: transform 0.4s;
+        }
+        /* ===== WATER LEVEL ===== */
+        
+        .tank {
+            height: 180px;
+            width: 80px;
+            border: 3px solid #555;
+            border-radius: 10px;
+            position: relative;
+            margin: auto;
+            overflow: hidden;
+            background: #eee;
+        }
+        
+        .water {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 0%;
+            background: linear-gradient(#81d4fa, #0288d1);
+            transition: height 0.5s;
+        }
+        
+        .safe-line {
+            position: absolute;
+            bottom: 60%;
+            width: 100%;
+            border-top: 2px dashed red;
+            font-size: 12px;
+            color: red;
+            text-align: center;
+        }
+        /* ===== BUTTONS ===== */
+        
+        .switch {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 10px 0;
+        }
+        
         button {
-            padding: 8px 16px;
+            padding: 10px 20px;
+            border-radius: 20px;
             border: none;
-            border-radius: 6px;
             cursor: pointer;
+            font-weight: bold;
+            transition: all 0.2s;
         }
         
         .on {
-            background: #4CAF50;
-            color: #fff;
+            background: #4caf50;
+            color: white;
+            box-shadow: 0 0 10px #4caf50;
         }
         
         .off {
             background: #ccc;
         }
         
-        .status {
-            font-size: 18px;
+        button:hover {
+            transform: scale(1.05);
         }
     </style>
 </head>
@@ -75,63 +158,61 @@
 
         <!-- SENSOR -->
         <div class="card">
-            <h2>Cảm biến</h2>
-            <div>Nhiệt độ: <span id="temp" class="value">--</span> °C</div>
-            <div>Ánh sáng: <span id="light" class="value">--</span></div>
-            <div>Khoảng cách: <span id="dist" class="value">--</span> cm</div>
-            <div>Đèn sưởi: <span id="heater" class="status">--</span></div>
+            <h2>🌡 Nhiệt độ</h2>
+            <div class="bar">
+                <div id="tempBar" class="bar-fill"></div>
+            </div>
+            <div><b><span id="temp">--</span> °C</b></div>
+
+            <h2>☀️ Ánh sáng</h2>
+            <div class="gauge">
+                <div id="lightNeedle" class="needle"></div>
+            </div>
+            <div style="text-align:center"><span id="light">--</span></div>
+
+            <h2>💧 Mực nước</h2>
+            <div class="tank">
+                <div class="safe-line">SAFE</div>
+                <div id="water" class="water"></div>
+            </div>
         </div>
 
         <!-- CONTROL -->
         <div class="card">
-            <h2>Điều khiển</h2>
+            <h2>🎛 Điều khiển</h2>
 
             <div class="switch">
-                Pump 1:
-                <button id="pump1" class="off">OFF</button>
+                Pump 1 <button id="pump1" class="off">OFF</button>
             </div>
-
             <div class="switch">
-                Pump1 Mode:
-                <button id="mode1" class="off">MANUAL</button>
+                Mode 1 <button id="mode1" class="off">MANUAL</button>
             </div>
-
             <div class="switch">
-                Pump 2:
-                <button id="pump2" class="off">OFF</button>
+                Pump 2 <button id="pump2" class="off">OFF</button>
             </div>
-
             <div class="switch">
-                Pump2 Mode:
-                <button id="mode2" class="off">MANUAL</button>
+                Mode 2 <button id="mode2" class="off">MANUAL</button>
             </div>
-
             <div class="switch">
-                LED 4:
-                <button id="led4" class="off">OFF</button>
+                LED 4 <button id="led4" class="off">OFF</button>
             </div>
         </div>
 
     </div>
 
     <script>
-        /* ================= MQTT CONFIG ================= */
         const client = mqtt.connect(
             "wss://bcf6c644707e4f51a13a84773949161e.s1.eu.hivemq.cloud:8884/mqtt", {
                 username: "esp8266",
-                password: "Cuong0772205498.",
-                reconnectPeriod: 2000
+                password: "Cuong0772205498."
             }
         );
 
         client.on("connect", () => {
-            console.log("MQTT connected");
-
             client.subscribe([
                 "tank/sensors/temp",
                 "tank/sensors/light",
                 "tank/sensors/dist",
-                "tank/heater/state",
                 "tank/pump1/state",
                 "tank/pump1/mode",
                 "tank/pump2/state",
@@ -140,71 +221,49 @@
             ]);
         });
 
-        /* ================= HANDLE INCOMING ================= */
         client.on("message", (topic, payload) => {
-            const msg = payload.toString();
+            const v = Number(payload.toString());
 
-            switch (topic) {
-                case "tank/sensors/temp":
-                    document.getElementById("temp").innerText = msg;
-                    break;
-
-                case "tank/sensors/light":
-                    document.getElementById("light").innerText = msg;
-                    break;
-
-                case "tank/sensors/dist":
-                    document.getElementById("dist").innerText = msg;
-                    break;
-
-                case "tank/heater/state":
-                    document.getElementById("heater").innerText =
-                        msg === "ON" ? "🔥 ĐANG SƯỞI" : "❄️ TẮT";
-                    break;
-
-                case "tank/pump1/state":
-                    setBtn("pump1", msg);
-                    break;
-
-                case "tank/pump1/mode":
-                    setBtn("mode1", msg);
-                    break;
-
-                case "tank/pump2/state":
-                    setBtn("pump2", msg);
-                    break;
-
-                case "tank/pump2/mode":
-                    setBtn("mode2", msg);
-                    break;
-
-                case "tank/led4/state":
-                    setBtn("led4", msg);
-                    break;
+            if (topic === "tank/sensors/temp") {
+                temp.innerText = v;
+                tempBar.style.width = (v / 50 * 100) + "%";
+                tempBar.className = "bar-fill " + (v < 16 ? "cold" : v < 31 ? "warm" : "hot");
             }
+
+            if (topic === "tank/sensors/light") {
+                light.innerText = v;
+                lightNeedle.style.transform = `rotate(${v / 1023 * 180 - 90}deg)`;
+            }
+
+            if (topic === "tank/sensors/dist") {
+                const level = Math.min(100, Math.max(0, 100 - v));
+                water.style.height = level + "%";
+            }
+
+            ["pump1", "mode1", "pump2", "mode2", "led4"].forEach(id => {
+                if (topic.includes(id)) {
+                    const b = document.getElementById(id);
+                    b.innerText = payload.toString();
+                    b.className = payload == "ON" || payload == "AUTO" ? "on" : "off";
+                }
+            })
         });
 
-        /* ================= BUTTON LOGIC ================= */
-        function setBtn(id, val) {
-            const b = document.getElementById(id);
-            b.innerText = val;
-            b.className = val === "ON" || val === "AUTO" ? "on" : "off";
-        }
-
-        function toggle(id, topic, onVal, offVal) {
-            const b = document.getElementById(id);
-            const next = b.innerText === onVal ? offVal : onVal;
-            client.publish(topic, next, {
-                retain: true
-            });
-        }
-
-        /* ================= EVENTS ================= */
-        pump1.onclick = () => toggle("pump1", "tank/pump1/cmd", "ON", "OFF");
-        mode1.onclick = () => toggle("mode1", "tank/mode1/cmd", "AUTO", "MANUAL");
-        pump2.onclick = () => toggle("pump2", "tank/pump2/cmd", "ON", "OFF");
-        mode2.onclick = () => toggle("mode2", "tank/mode2/cmd", "AUTO", "MANUAL");
-        led4.onclick = () => toggle("led4", "tank/led4/cmd", "ON", "OFF");
+        pump1.onclick = () => client.publish("tank/pump1/cmd", pump1.innerText === "ON" ? "OFF" : "ON", {
+            retain: true
+        });
+        mode1.onclick = () => client.publish("tank/mode1/cmd", mode1.innerText === "AUTO" ? "MANUAL" : "AUTO", {
+            retain: true
+        });
+        pump2.onclick = () => client.publish("tank/pump2/cmd", pump2.innerText === "ON" ? "OFF" : "ON", {
+            retain: true
+        });
+        mode2.onclick = () => client.publish("tank/mode2/cmd", mode2.innerText === "AUTO" ? "MANUAL" : "AUTO", {
+            retain: true
+        });
+        led4.onclick = () => client.publish("tank/led4/cmd", led4.innerText === "ON" ? "OFF" : "ON", {
+            retain: true
+        });
     </script>
 
 </body>
