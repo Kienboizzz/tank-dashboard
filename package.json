@@ -1,0 +1,12 @@
+{
+  "name": "tank-dashboard",
+  "version": "1.0.0",
+  "description": "MQTT Tank Web UI",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.22.1"
+  }
+}
