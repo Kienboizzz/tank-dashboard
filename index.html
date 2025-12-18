@@ -9,14 +9,13 @@
     <style>
         body {
             font-family: "Segoe UI", sans-serif;
-            background: linear-gradient(135deg, #e3f2fd, #f9fbe7);
+            background: linear-gradient(135deg, #e3f2fd, #f1f8e9);
             margin: 0;
             padding: 20px;
         }
         
         h1 {
             text-align: center;
-            margin-bottom: 20px;
         }
         
         .container {
@@ -29,41 +28,35 @@
             background: #fff;
             border-radius: 16px;
             padding: 20px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, .12);
         }
-        
-        h2 {
-            margin-top: 0;
-        }
-        /* ===== LEVEL BAR ===== */
+        /* ===== NHIỆT ĐỘ ===== */
         
         .bar {
-            height: 22px;
+            height: 20px;
             background: #ddd;
-            border-radius: 12px;
+            border-radius: 10px;
             overflow: hidden;
-            margin: 8px 0;
         }
         
         .bar-fill {
             height: 100%;
-            width: 0%;
-            transition: width 0.5s, background 0.5s;
+            width: 0;
+            transition: .4s;
         }
-        /* ===== TEMP COLORS ===== */
         
         .cold {
-            background: #42a5f5;
+            background: #42a5f5
         }
         
         .warm {
-            background: #66bb6a;
+            background: #66bb6a
         }
         
         .hot {
-            background: #ef5350;
+            background: #ef5350
         }
-        /* ===== LIGHT GAUGE ===== */
+        /* ===== ÁNH SÁNG ===== */
         
         .gauge {
             width: 140px;
@@ -83,19 +76,18 @@
             left: 50%;
             transform-origin: bottom center;
             transform: rotate(-90deg);
-            transition: transform 0.4s;
+            transition: .4s;
         }
-        /* ===== WATER LEVEL ===== */
+        /* ===== BÌNH NƯỚC ===== */
         
         .tank {
-            height: 180px;
             width: 80px;
+            height: 180px;
             border: 3px solid #555;
             border-radius: 10px;
-            position: relative;
             margin: auto;
+            position: relative;
             overflow: hidden;
-            background: #eee;
         }
         
         .water {
@@ -103,49 +95,54 @@
             bottom: 0;
             width: 100%;
             height: 0%;
-            background: linear-gradient(#81d4fa, #0288d1);
-            transition: height 0.5s;
+            transition: .4s;
+        }
+        
+        .water.low {
+            background: linear-gradient(#ef5350, #c62828)
+        }
+        
+        .water.mid {
+            background: linear-gradient(#fff176, #fbc02d)
+        }
+        
+        .water.high {
+            background: linear-gradient(#81c784, #2e7d32)
         }
         
         .safe-line {
             position: absolute;
-            bottom: 60%;
+            bottom: calc((28 - 5) / 28 * 100%);
             width: 100%;
             border-top: 2px dashed red;
             font-size: 12px;
-            color: red;
             text-align: center;
+            color: red;
         }
-        /* ===== BUTTONS ===== */
+        /* ===== ĐIỀU KHIỂN ===== */
         
         .switch {
             display: flex;
             justify-content: space-between;
-            align-items: center;
             margin: 10px 0;
         }
         
         button {
-            padding: 10px 20px;
+            padding: 8px 20px;
             border-radius: 20px;
             border: none;
-            cursor: pointer;
             font-weight: bold;
-            transition: all 0.2s;
+            cursor: pointer;
         }
         
         .on {
             background: #4caf50;
-            color: white;
+            color: #fff;
             box-shadow: 0 0 10px #4caf50;
         }
         
         .off {
             background: #ccc;
-        }
-        
-        button:hover {
-            transform: scale(1.05);
         }
     </style>
 </head>
@@ -156,46 +153,36 @@
 
     <div class="container">
 
-        <!-- SENSOR -->
         <div class="card">
             <h2>🌡 Nhiệt độ</h2>
             <div class="bar">
                 <div id="tempBar" class="bar-fill"></div>
             </div>
-            <div><b><span id="temp">--</span> °C</b></div>
+            <b><span id="temp">--</span> °C</b>
 
             <h2>☀️ Ánh sáng</h2>
             <div class="gauge">
                 <div id="lightNeedle" class="needle"></div>
             </div>
-            <div style="text-align:center"><span id="light">--</span></div>
+            <div style="text-align:center"><b><span id="light">--</span></b></div>
 
             <h2>💧 Mực nước</h2>
             <div class="tank">
-                <div class="safe-line">SAFE</div>
+                <div class="safe-line">5 cm</div>
                 <div id="water" class="water"></div>
+            </div>
+            <div style="text-align:center;margin-top:6px">
+                <b><span id="dist">--</span> cm</b>
             </div>
         </div>
 
-        <!-- CONTROL -->
         <div class="card">
             <h2>🎛 Điều khiển</h2>
-
-            <div class="switch">
-                Pump 1 <button id="pump1" class="off">OFF</button>
-            </div>
-            <div class="switch">
-                Mode 1 <button id="mode1" class="off">MANUAL</button>
-            </div>
-            <div class="switch">
-                Pump 2 <button id="pump2" class="off">OFF</button>
-            </div>
-            <div class="switch">
-                Mode 2 <button id="mode2" class="off">MANUAL</button>
-            </div>
-            <div class="switch">
-                LED 4 <button id="led4" class="off">OFF</button>
-            </div>
+            <div class="switch">Pump 1 <button id="pump1" class="off">OFF</button></div>
+            <div class="switch">Mode 1 <button id="mode1" class="off">MANUAL</button></div>
+            <div class="switch">Pump 2 <button id="pump2" class="off">OFF</button></div>
+            <div class="switch">Mode 2 <button id="mode2" class="off">MANUAL</button></div>
+            <div class="switch">LED 4 <button id="led4" class="off">OFF</button></div>
         </div>
 
     </div>
@@ -204,7 +191,8 @@
         const client = mqtt.connect(
             "wss://bcf6c644707e4f51a13a84773949161e.s1.eu.hivemq.cloud:8884/mqtt", {
                 username: "esp8266",
-                password: "Cuong0772205498."
+                password: "Cuong0772205498.",
+                reconnectPeriod: 2000
             }
         );
 
@@ -221,8 +209,23 @@
             ]);
         });
 
+        function setBtn(id, val) {
+            const b = document.getElementById(id);
+            b.innerText = val;
+            b.className = (val === "ON" || val === "AUTO") ? "on" : "off";
+        }
+
+        function toggle(id, topic, onVal, offVal) {
+            const b = document.getElementById(id);
+            const next = b.innerText === onVal ? offVal : onVal;
+            client.publish(topic, next, {
+                retain: true
+            });
+        }
+
         client.on("message", (topic, payload) => {
-            const v = Number(payload.toString());
+            const msg = payload.toString();
+            const v = Number(msg);
 
             if (topic === "tank/sensors/temp") {
                 temp.innerText = v;
@@ -236,34 +239,33 @@
             }
 
             if (topic === "tank/sensors/dist") {
-                const level = Math.min(100, Math.max(0, 100 - v));
-                water.style.height = level + "%";
+                dist.innerText = v;
+
+                const maxDist = 28;
+                const minDist = 5;
+
+                let percent = (maxDist - v) / (maxDist - minDist) * 100;
+                percent = Math.max(0, Math.min(100, percent));
+                water.style.height = percent + "%";
+
+                water.className = "water";
+                if (v <= 10) water.classList.add("high");
+                else if (v <= 20) water.classList.add("mid");
+                else water.classList.add("low");
             }
 
-            ["pump1", "mode1", "pump2", "mode2", "led4"].forEach(id => {
-                if (topic.includes(id)) {
-                    const b = document.getElementById(id);
-                    b.innerText = payload.toString();
-                    b.className = payload == "ON" || payload == "AUTO" ? "on" : "off";
-                }
-            })
+            if (topic === "tank/pump1/state") setBtn("pump1", msg);
+            if (topic === "tank/pump1/mode") setBtn("mode1", msg);
+            if (topic === "tank/pump2/state") setBtn("pump2", msg);
+            if (topic === "tank/pump2/mode") setBtn("mode2", msg);
+            if (topic === "tank/led4/state") setBtn("led4", msg);
         });
 
-        pump1.onclick = () => client.publish("tank/pump1/cmd", pump1.innerText === "ON" ? "OFF" : "ON", {
-            retain: true
-        });
-        mode1.onclick = () => client.publish("tank/mode1/cmd", mode1.innerText === "AUTO" ? "MANUAL" : "AUTO", {
-            retain: true
-        });
-        pump2.onclick = () => client.publish("tank/pump2/cmd", pump2.innerText === "ON" ? "OFF" : "ON", {
-            retain: true
-        });
-        mode2.onclick = () => client.publish("tank/mode2/cmd", mode2.innerText === "AUTO" ? "MANUAL" : "AUTO", {
-            retain: true
-        });
-        led4.onclick = () => client.publish("tank/led4/cmd", led4.innerText === "ON" ? "OFF" : "ON", {
-            retain: true
-        });
+        pump1.onclick = () => toggle("pump1", "tank/pump1/cmd", "ON", "OFF");
+        mode1.onclick = () => toggle("mode1", "tank/mode1/cmd", "AUTO", "MANUAL");
+        pump2.onclick = () => toggle("pump2", "tank/pump2/cmd", "ON", "OFF");
+        mode2.onclick = () => toggle("mode2", "tank/mode2/cmd", "AUTO", "MANUAL");
+        led4.onclick = () => toggle("led4", "tank/led4/cmd", "ON", "OFF");
     </script>
 
 </body>
