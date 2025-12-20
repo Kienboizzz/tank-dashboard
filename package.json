@@ -7,6 +7,20 @@
     "start": "node server.js"
   },
   "dependencies": {
-    "express": "^4.22.1"
-  }
+    "express": "^4.22.1",
+    "mqtt": "^5.14.1",
+    "socket.io": "^4.8.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Kienboizzz/tank-dashboard.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/Kienboizzz/tank-dashboard/issues"
+  },
+  "homepage": "https://github.com/Kienboizzz/tank-dashboard#readme"
 }

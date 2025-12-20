@@ -144,6 +144,11 @@
         .off {
             background: #ccc;
         }
+        
+        button:disabled {
+            cursor: default;
+            opacity: 0.8;
+        }
     </style>
 </head>
 
@@ -152,7 +157,7 @@
     <h1>🚰 Tank MQTT Dashboard</h1>
 
     <div class="container">
-
+        <!-- Card cảm biến -->
         <div class="card">
             <h2>🌡 Nhiệt độ</h2>
             <div class="bar">
@@ -176,6 +181,7 @@
             </div>
         </div>
 
+        <!-- Card điều khiển -->
         <div class="card">
             <h2>🎛 Điều khiển</h2>
             <div class="switch">Pump 1 <button id="pump1" class="off">OFF</button></div>
@@ -183,8 +189,8 @@
             <div class="switch">Pump 2 <button id="pump2" class="off">OFF</button></div>
             <div class="switch">Mode 2 <button id="mode2" class="off">MANUAL</button></div>
             <div class="switch">LED 4 <button id="led4" class="off">OFF</button></div>
+            <div class="switch">Heater <button id="heater" class="off" disabled>OFF</button></div>
         </div>
-
     </div>
 
     <script>
@@ -205,7 +211,8 @@
                 "tank/pump1/mode",
                 "tank/pump2/state",
                 "tank/pump2/mode",
-                "tank/led4/state"
+                "tank/led4/state",
+                "tank/heater/state"
             ]);
         });
 
@@ -240,10 +247,8 @@
 
             if (topic === "tank/sensors/dist") {
                 dist.innerText = v;
-
                 const maxDist = 28;
                 const minDist = 5;
-
                 let percent = (maxDist - v) / (maxDist - minDist) * 100;
                 percent = Math.max(0, Math.min(100, percent));
                 water.style.height = percent + "%";
@@ -259,6 +264,11 @@
             if (topic === "tank/pump2/state") setBtn("pump2", msg);
             if (topic === "tank/pump2/mode") setBtn("mode2", msg);
             if (topic === "tank/led4/state") setBtn("led4", msg);
+            if (topic === "tank/heater/state") {
+                const b = document.getElementById("heater");
+                b.innerText = msg;
+                b.className = (msg === "ON") ? "on" : "off";
+            }
         });
 
         pump1.onclick = () => toggle("pump1", "tank/pump1/cmd", "ON", "OFF");
