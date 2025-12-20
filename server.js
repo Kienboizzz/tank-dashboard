@@ -18,16 +18,22 @@ const mqttClient = mqtt.connect(
     }
 );
 
+// 👉 cache trạng thái MQTT cuối cùng
+const lastData = {};
+
 mqttClient.on("connect", () => {
     console.log("MQTT connected");
     mqttClient.subscribe("tank/#");
 });
 
 mqttClient.on("message", (topic, payload) => {
-    io.emit("mqtt", {
-        topic,
-        msg: payload.toString()
-    });
+    const msg = payload.toString();
+
+    // lưu lại dữ liệu mới nhất
+    lastData[topic] = msg;
+
+    // đẩy realtime cho tất cả client đang mở
+    io.emit("mqtt", { topic, msg });
 });
 
 // ================= WEB =================
@@ -37,10 +43,18 @@ app.get("/", (req, res) => {
     res.sendFile(path.join(__dirname, "index.html"));
 });
 
-// nhận lệnh từ web → publish MQTT
 io.on("connection", (socket) => {
     console.log("Web client connected");
 
+    // 👉 gửi snapshot cho client mới
+    for (const topic in lastData) {
+        socket.emit("mqtt", {
+            topic,
+            msg: lastData[topic]
+        });
+    }
+
+    // nhận lệnh từ web → publish MQTT
     socket.on("cmd", ({ topic, value }) => {
         mqttClient.publish(topic, value, { retain: true });
     });
